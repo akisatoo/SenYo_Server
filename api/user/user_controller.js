@@ -1,5 +1,6 @@
 var User = require('./user_model');
 var validator = require('validator');
+var Common = require('../common');
 
 // Get list of favs
 exports.index = function(req, res) {
@@ -23,39 +24,48 @@ exports.show = function(req, res) {
 // Creates a new fav in the DB.
 exports.create = function(req, res) {
 
-    //バリデーション
-    validator.isNull(req.body.account_id);
-    validator.isAlphanumeric(req.body.account_id);
-    
     var userData = {
-        account_id: req.body.account_id,
-        name: req.body.name,
-        password: req.body.password,
-        image: req.body.image
+        account_id: req.body.account_id || '',
+        password: req.body.password || '',
+        name: req.body.name || '',
+        image: ''
     };
+    
+    //バリデーション
+    var errors = [];
+    if (validator.isNull(userData.account_id)) errors.push('アカウントIDを入力してください');
+    if (!validator.isAlphanumeric(userData.account_id)) errors.push('アカウントIDは半角英数字を入力してください');
+    if (validator.isNull(userData.password)) errors.push('パスワードを入力してください');
+    if (!validator.isLength(userData.password, {min: 4, max: 8}) || !validator.isAlphanumeric(userData.password)) errors.push('パスワードには4〜8文字の半角英数字を入力してください');
+    if (validator.isNull(userData.name)) errors.push('ユーザー名を入力してください');
+
+    if (errors.length > 0) return res.json(Common.createErrorResponse(true, errors));
 
     var newUser = new User(userData);
     newUser.save(function(err) {
-        if (err) return res.json(400, err);
-        res.json(newUser);
+        if (err) return Common.createErrorResponse(true);
+        res.json(Common.createResponse(newUser));
     });
 };
 
 exports.login = function(req, res) {
 
-    //バリデーション
-    validator.isNull(req.body.account_id);
-    validator.isAlphanumeric(req.body.account_id);
-    
     var loginData = {
-        account_id: req.body.account_id,
-        password: req.body.password,
+        account_id: req.body.account_id || '',
+        password: req.body.password || ''
     };
+    
+    //バリデーション
+    var errors = [];
+    if (validator.isNull(loginData.account_id)) errors.push('アカウントIDを入力してください');
+    if (!validator.isAlphanumeric(loginData.account_id)) errors.push('アカウントIDは半角英数字を入力してください');
 
+    if (errors.length > 0) return res.json(Common.createErrorResponse(true, errors));
+    
     User.findOne(loginData, function(err, user) {
-        if (err) return;
-        if (!user) return res.json({status: 'success', error: 'アカウントIDまたはパスワードが正しくありません'});
+        if (err) return Common.createErrorResponse(true);
+        if (!user) return res.json(Common.createErrorResponse(true, ['アカウントIDまたはパスワードが正しくありません']));
 
-        res.json(user);
+        res.json(Common.createResponse(user));
     });
 };
