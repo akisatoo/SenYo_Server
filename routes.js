@@ -6,6 +6,9 @@ module.exports = function(app) {
     //Group
     app.use('/api/group', require('./api/group'));
 
+    //Notice
+    app.use('/api/notice', require('./api/notice'));
+
     //app.route('/:url(api|auth|components|app|brower_components|assets)/*').get(errors[404]);
 
     app.route('/*').get(function(req, res) {

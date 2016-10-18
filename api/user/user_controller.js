@@ -39,11 +39,12 @@ exports.create = function(req, res) {
     if (!validator.isLength(userData.password, {min: 4, max: 8}) || !validator.isAlphanumeric(userData.password)) errors.push('パスワードには4〜8文字の半角英数字を入力してください');
     if (validator.isNull(userData.name)) errors.push('ユーザー名を入力してください');
 
-    if (errors.length > 0) return res.json(Common.createErrorResponse(true, errors));
+    if (errors.length > 0) return res.json(Common.createErrorResponse(errors));
 
     var newUser = new User(userData);
     newUser.save(function(err) {
-        if (err) return Common.createErrorResponse(true);
+        if (err) return res.json(Common.createErrorResponse());
+        console.log(userData);
         res.json(Common.createResponse(newUser));
     });
 };
@@ -60,11 +61,11 @@ exports.login = function(req, res) {
     if (validator.isNull(loginData.account_id)) errors.push('アカウントIDを入力してください');
     if (!validator.isAlphanumeric(loginData.account_id)) errors.push('アカウントIDは半角英数字を入力してください');
 
-    if (errors.length > 0) return res.json(Common.createErrorResponse(true, errors));
-    
+    if (errors.length > 0) return res.json(Common.createErrorResponse(errors));
+
     User.findOne(loginData, function(err, user) {
-        if (err) return Common.createErrorResponse(true);
-        if (!user) return res.json(Common.createErrorResponse(true, ['アカウントIDまたはパスワードが正しくありません']));
+        if (err) return res.json(Common.createErrorResponse());
+        if (!user) return res.json(Common.createErrorResponse(['アカウントIDまたはパスワードが正しくありません']));
 
         res.json(Common.createResponse(user));
     });

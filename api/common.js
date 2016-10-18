@@ -7,7 +7,7 @@ exports.createResponse = function(res) {
 };
 
 
-exports.createErrorResponse = function(success, errors) {
-    return {status: success ? 'success' : 'errors', error: errors || ['原因不明のエラーです']};
+exports.createErrorResponse = function(errors) {
+    return {status: 'error', errors: errors || ['原因不明のエラーです']};
 };
 
