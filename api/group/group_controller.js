@@ -55,7 +55,7 @@ exports.edit = function(req, res) {
 
     var groupId = req.body.group_id || '';
     var groupData = {
-        member_ids: [req.body.member_ids] || [],
+        member_ids: req.body.member_ids || [],
         name: req.body.name || ''
     };
 
@@ -69,7 +69,6 @@ exports.edit = function(req, res) {
         if (err) return Common.createErrorResponse();
         if (!group) return Common.createErrorResponse(['該当するグループがありません']);
         group.name = groupData.name;
-        console.log(groupData.member_ids);
         group.member_ids = groupData.member_ids;
         group.save(function(err) {
             if (err) return Common.createErrorResponse();

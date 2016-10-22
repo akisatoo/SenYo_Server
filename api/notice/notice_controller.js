@@ -47,11 +47,9 @@ exports.create = function(req, res) {
 
 exports.make = function(noticeData) {
     noticeData = noticeData || {};
-    console.log(noticeData);
     var notice = new Notice(noticeData);
     
-    notice.save(function(err) {
-    });
+    notice.save(function(err) {});
     
     return;
 };
