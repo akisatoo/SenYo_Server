@@ -37,8 +37,8 @@ exports.create = function(req, res) {
 
     if (errors.length > 0) return res.json(Common.createErrorResponse(errors));
 
-    var noticeGroup = new Group(noticeData);
-    noticeGroup.save(function(err) {
+    var notice = new Notice(noticeData);
+    notice.save(function(err) {
         if (err) return Common.createErrorResponse();
         res.json(Common.createResponse(noticeGroup));
     });
@@ -47,9 +47,11 @@ exports.create = function(req, res) {
 
 exports.make = function(noticeData) {
     noticeData = noticeData || {};
-
-    var noticeGroup = new Group(noticeData);
-    noticeGroup.save(function(err) {
-        if (err) return Common.createErrorResponse();
+    console.log(noticeData);
+    var notice = new Notice(noticeData);
+    
+    notice.save(function(err) {
     });
+    
+    return;
 };

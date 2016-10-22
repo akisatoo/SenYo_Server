@@ -43,7 +43,7 @@ exports.create = function(req, res) {
 
     var newUser = new User(userData);
     newUser.save(function(err) {
-        if (err) return res.json(Common.createErrorResponse());
+        if (err) return res.json(Common.createErrorResponse(err.errors));
         console.log(userData);
         res.json(Common.createResponse(newUser));
     });

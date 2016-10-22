@@ -55,13 +55,13 @@ exports.edit = function(req, res) {
 
     var groupId = req.body.group_id || '';
     var groupData = {
-        member_ids: req.body.member_ids || [],
+        member_ids: [req.body.member_ids] || [],
         name: req.body.name || ''
     };
-    
+
     //バリデーション
     var errors = [];
-    if (validator.isNull(groupData.name)) errors.push('グループ名を入力してください');
+    if (validator.isNull(groupId)) errors.push('グループ名を入力してください');
 
     if (errors.length > 0) return res.json(Common.createErrorResponse(errors));
 
@@ -69,10 +69,10 @@ exports.edit = function(req, res) {
         if (err) return Common.createErrorResponse();
         if (!group) return Common.createErrorResponse(['該当するグループがありません']);
         group.name = groupData.name;
+        console.log(groupData.member_ids);
         group.member_ids = groupData.member_ids;
         group.save(function(err) {
             if (err) return Common.createErrorResponse();
-
             //お知らせに追加
             _.each(group.member_ids, function(id) {
                 Notice.make({
