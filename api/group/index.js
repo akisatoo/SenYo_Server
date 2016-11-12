@@ -3,8 +3,8 @@ var controller = require('./group_controller');
 
 var router = express.Router();
 
-router.get('/:id', controller.show);
-router.get('/', controller.index);
+router.get('/', controller.show);
+//router.get('/', controller.index);
 router.post('/', controller.create);
 router.post('/edit', controller.edit);
 router.post('/message', controller.message);

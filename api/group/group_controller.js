@@ -16,8 +16,16 @@ exports.index = function(req, res) {
 // Get a single fav
 exports.show = function(req, res) {
     //57e610e0c89d1f5dfdcc1404
-    console.log('show');
-    Group.findOne({_id: '57e610e0c89d1f5dfdcc1404'}, function(err, groups) {
+    var id = req.query.id || '';
+
+    //バリデーション
+    var errors = [];
+    if (validator.isNull(id)) errors.push('IDを入力してください');
+
+    if (errors.length > 0) return res.json(Common.createErrorResponse(errors));
+
+
+    Group.findOne({_id: id}, function(err, groups) {
         if (err) return Common.createErrorResponse();
 
         res.json(Common.createResponse(groups));
