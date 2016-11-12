@@ -9,6 +9,7 @@ router.post('/', controller.create);
 router.post('/edit', controller.edit);
 router.post('/message', controller.message);
 router.post('/reaction', controller.reaction);
-router.post('/list', controller.list);
+router.get('/list', controller.list);
+router.post('/approval', controller.approval);
 
 module.exports = router;

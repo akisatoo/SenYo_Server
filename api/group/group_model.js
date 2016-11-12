@@ -5,7 +5,7 @@ var Schema = mongoose.Schema;
 var GroupSchema = new Schema({
     name: { type: String, required: 'グループ名を入力してください'},
     leader_id: { type: String, required: 'リーダーIDを入力してください'},
-    member_ids: { type : Array , "default" : [] },
+    members: { type : Array , "default" : [] },
     message: String,
     calling_flag: Boolean,
     reactions: { type : Array , "default" : [] }
