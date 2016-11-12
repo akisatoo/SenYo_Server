@@ -148,17 +148,25 @@ exports.reaction = function(req, res) {
 
 exports.list = function(req, res) {
 
-    var leaderData = {
-        leader_id: req.body.leader_id || ''
+    var userData = {
+        _id: req.body.user_id || '',
+        leader_id: req.body.user_id || ''
     };
-    
+
+    var query = {
+        $or: [ 
+            { "_id": req.body.user_id || '' },
+            { "leader_id": req.body.user_id || '' }
+        ]
+    };
+
     //バリデーション
     var errors = [];
-    if (validator.isNull(leaderData.leader_id)) errors.push('リーダーIDを入力してください');
+    if (validator.isNull(userData._id) || validator.isNull(userData.leader_id)) errors.push('ユーザーIDを入力してください');
 
     if (errors.length > 0) return res.json(Common.createErrorResponse(errors));
     
-    Group.find(leaderData, function(err, groups) {
+    Group.find(query, function(err, groups) {
         if (err) return Common.createErrorResponse();
         if (!groups) return res.json(Common.createErrorResponse(['アカウントIDまたはパスワードが正しくありません']));
 
