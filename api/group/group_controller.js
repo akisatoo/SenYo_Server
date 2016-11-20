@@ -4,6 +4,7 @@ var Notice = require('../notice/notice_controller');
 var validator = require('validator');
 var _ = require('lodash');
 var Common = require('../common');
+var ObjectId = require('mongoose').Types.ObjectId;
 
 // Get list of favs
 exports.index = function(req, res) {
@@ -52,10 +53,33 @@ exports.create = function(req, res) {
 
     if (errors.length > 0) return res.json(Common.createErrorResponse(errors));
 
-    var newGroup = new Group(groupData);
-    newGroup.save(function(err) {
-        if (err) return Common.createErrorResponse();
-        res.json(Common.createResponse(newGroup));
+    
+    var groupSave = function() {
+        groupData.members = newUserData;
+
+        var newGroup = new Group(groupData);
+        newGroup.save(function(err) {
+            if (err) return Common.createErrorResponse();
+            res.json(Common.createResponse(newGroup));
+        });
+    };
+
+    var newUserData = [];
+    
+    if (groupData.members.length === 0) {
+        groupSave();
+        return;
+    }
+
+    _.each(groupData.members, function(memberId, index) {
+        User.findOne({_id: memberId}, function(err, user) {
+            if (err) return Common.createErrorResponse();
+            newUsersData.push(user);
+
+            if (index === groupData.members.length - 1) {
+                groupSave();
+            }
+        });
     });
 };
 
@@ -64,7 +88,8 @@ exports.edit = function(req, res) {
 
     var groupId = req.body.group_id || '';
     var groupData = {
-        members: req.body.members || [],
+        add_members: req.body.add_members || [],
+        remove_members: req.body.remove_members || [],
         name: req.body.name || ''
     };
 
@@ -74,11 +99,10 @@ exports.edit = function(req, res) {
 
     if (errors.length > 0) return res.json(Common.createErrorResponse(errors));
 
-    Group.findOne({_id: groupId}, function(err, group) {
-        if (err) return Common.createErrorResponse();
-        if (!group) return Common.createErrorResponse(['該当するグループがありません']);
+
+    var groupSave = function(group, newMemberList) {
         group.name = groupData.name;
-        group.members = groupData.members;
+        group.members = newMemberList;
         group.save(function(err) {
             if (err) return Common.createErrorResponse();
             //お知らせに追加
@@ -91,6 +115,35 @@ exports.edit = function(req, res) {
                 });
             });
             res.json(Common.createResponse(group));
+        });
+   
+    };
+
+    Group.findOne({_id: groupId}, function(err, group) {
+        if (err) return Common.createErrorResponse();
+        if (!group) return Common.createErrorResponse(['該当するグループがありません']);
+
+        var originMemberIds = _.map(group.members, '_id')
+        //削除したいメンバーを除外
+        originMemberIds = _.without(originMemberIds, groupData.remove_members);
+        //削除したいメンバーIDを除外後の配列と追加メンバーのIDをマージ
+        var editMemberIds = _.union(originMemberIds, groupData.add_members);
+        var newMemberList = [];
+
+        if (editMemberIds.length === 0) {
+            groupSave(group, newMemberList);
+            return;
+        }
+
+        _.each(editMemberIds, function(memberId, index) {
+            User.findOne({_id: new ObjectId(memberId)}, function(err, user) {
+                if (err) return Common.createErrorResponse();
+                newMemberList.push(user);
+                if (index === editMemberIds.length - 1) {
+                    //全てのユーザー検索が終わったタイミングで次の処理を実行
+                    groupSave(group, newMemberList);
+                }
+            }); 
         });
     });
 };
@@ -156,7 +209,7 @@ exports.list = function(req, res) {
 
     var query = {
         $or: [ 
-            { "members._id": data._id || '' },
+            { "members._id": new ObjectId(data._id) || '' },
             { "leader_id": data.leader_id || '' }
         ]
     };
