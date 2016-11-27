@@ -58,8 +58,17 @@ exports.create = function(req, res) {
         groupData.members = newUserData;
 
         var newGroup = new Group(groupData);
-        newGroup.save(function(err) {
+        newGroup.save(function(err, group) {
             if (err) return Common.createErrorResponse();
+            //お知らせに追加
+            _.each(newGroup.members, function(user) {
+                Notice.make({
+                    user_id: user._id,
+                    group_id: group._id,
+                    message: 'グループ「' + group.name + '」に招待されました',
+                    type: 'invitation'
+                });
+            });
             res.json(Common.createResponse(newGroup));
         });
     };
@@ -95,7 +104,8 @@ exports.edit = function(req, res) {
 
     //バリデーション
     var errors = [];
-    if (validator.isNull(groupId)) errors.push('グループ名を入力してください');
+    if (validator.isNull(groupId)) errors.push('グループIDを指定してください');
+    if (validator.isNull(groupData.name)) errors.push('グループ名を入力してください');
 
     if (errors.length > 0) return res.json(Common.createErrorResponse(errors));
 
@@ -106,9 +116,9 @@ exports.edit = function(req, res) {
         group.save(function(err) {
             if (err) return Common.createErrorResponse();
             //お知らせに追加
-            _.each(group.members, function(id) {
+            _.each(group.members, function(user) {
                 Notice.make({
-                    user_id: id,
+                    user_id: user._id,
                     group_id: groupId,
                     message: 'グループ「' + group.name + '」に招待されました',
                     type: 'invitation'

@@ -5,8 +5,15 @@ var Common = require('../common');
 
 // Get list of favs
 exports.index = function(req, res) {
-    console.log(req.param);
-    Notice.find({}, function(err, groups) {
+    console.log(req.query.user_id)
+    var userId = req.query.user_id || '';
+
+    //バリデーション
+    var errors = [];
+    if (validator.isNull(userId)) error.push('ユーザーIDを指定してください');
+    //if (errors.length > 0) return res.json(Common.createErrorResponse(errors));
+
+    Notice.find({user_id: userId}, function(err, groups) {
         if (err) return Common.createErrorResponse();
 
         res.json(Common.createResponse(groups));
@@ -16,6 +23,22 @@ exports.index = function(req, res) {
 // Get a single fav
 exports.show = function(req, res) {
     Notice.find({_id: '57e610e0c89d1f5dfdcc1404'}, function(err, groups) {
+        if (err) return Common.createErrorResponse();
+
+        res.json(Common.createResponse(groups));
+    });
+};
+
+
+// Get a single fav
+exports.list = function(req, res) {
+    var userId = req.query.user_id || '';
+    //バリデーション
+    var errors = [];
+    if (validator.isNull(userId)) error.push('ユーザーIDを指定してください');
+    if (errors.length > 0) return res.json(Common.createErrorResponse(errors));
+
+    Notice.find({user_id: userId}, function(err, groups) {
         if (err) return Common.createErrorResponse();
 
         res.json(Common.createResponse(groups));
