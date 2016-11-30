@@ -5,13 +5,12 @@ var Common = require('../common');
 
 // Get list of favs
 exports.index = function(req, res) {
-    console.log(req.query.user_id)
     var userId = req.query.user_id || '';
 
     //バリデーション
     var errors = [];
     if (validator.isNull(userId)) error.push('ユーザーIDを指定してください');
-    //if (errors.length > 0) return res.json(Common.createErrorResponse(errors));
+    if (errors.length > 0) return res.json(Common.createErrorResponse(errors));
 
     Notice.find({user_id: userId}, function(err, groups) {
         if (err) return Common.createErrorResponse();

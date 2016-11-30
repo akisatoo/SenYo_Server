@@ -69,3 +69,21 @@ exports.login = function(req, res) {
         res.json(Common.createResponse(user));
     });
 };
+
+
+exports.search = function(req, res) {
+
+    var accountId = req.query.account_id || '';
+    
+    //バリデーション
+    var errors = [];
+    if (validator.isNull(accountId)) errors.push('アカウントIDを入力してください');
+    if (errors.length > 0) return res.json(Common.createErrorResponse(errors));
+    
+    User.find({account_id: new RegExp('' + accountId + '', 'i') }, function(err, users) {
+        if (err) return res.json(Common.createErrorResponse());
+        if (!users) return res.json(Common.createErrorResponse(['アカウントIDが正しくありません']));
+
+        res.json(Common.createResponse(users));
+    });
+};
